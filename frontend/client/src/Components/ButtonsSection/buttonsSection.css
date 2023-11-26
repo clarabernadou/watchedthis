@@ -1,0 +1,29 @@
+.buttonsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5% 3% 0% 3%;
+    gap: 1em;
+}
+
+.buttonsColor {
+    background-color: #372890;
+}
+
+.halloweenColor {
+    background-color: #DE5609;
+}
+
+.pinkOctoberColor {
+    background-color: #E7438A;
+}
+
+.christmasColor {
+    background-color: lightblue;
+}
+
+@media screen and (max-width: 767px) {
+    .buttonsContainer {
+        justify-content: flex-start;
+    }
+}

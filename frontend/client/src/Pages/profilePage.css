@@ -1,0 +1,6 @@
+.profileFormContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3em 0;
+}

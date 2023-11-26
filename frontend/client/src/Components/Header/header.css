@@ -1,0 +1,67 @@
+.headerContainer {
+    width: 100%;
+}
+
+.headerMainSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3%;
+}
+
+.userIcon {
+    height: 3.1em;
+    width: 3.1em;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+a {
+    color: #181818;
+}
+
+hr {
+    opacity: 0.1;
+}
+
+.searchAndEvent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+}
+
+.eventLink {
+    font-size: x-large;
+    font-weight: 900;
+}
+
+.activeHalloweenLink {
+    color: #DE5609 !important;
+    text-decoration: underline !important;
+}
+
+body.no-scoll {
+    overflow: hidden;
+}
+
+.closeMenu {
+    position: absolute;
+    z-index: 100;
+    color: white;
+    top: 1em;
+    right: 1em;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+@media screen and (max-width: 767px) {
+    .headerLogo {
+        height: 4em;
+    }
+
+    .eventLink {
+        font-size: 1em;
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,71 @@
+.searchBar {
+    display: flex;
+    align-items: center;
+    color: black;
+    background-color: white;
+    padding: 1em;
+    border-radius: 2em;
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    transition: width 0.5s ease-in-out;
+    position: relative;
+}
+
+.searchBar.open {
+    width: 15em;
+}
+
+.searchBarInner {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.icon {
+    width: 1.2em;
+    height: 1.2em;
+}
+
+input {
+    background-color: none;
+    border: none;
+    width: 100%;
+    font-size: 1em;
+}
+
+.searchBarInput {
+    padding: 0;
+    border-radius: 0;
+    margin: 0;
+}
+
+input:focus {
+    outline: none;
+}
+
+.searchBarContainer {
+    width: 100%;
+    display: contents;
+}
+
+@media screen and (max-width: 767px) {
+    .searchBar {
+        padding: 0.8em;
+    }
+
+    .searchBar.open {
+        width: 10em;
+    }
+
+    input {
+        font-size: 0.7em;
+    }
+
+    .icon {
+        width: 1em;
+        height: 1em;
+    }
+}

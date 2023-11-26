@@ -1,0 +1,14 @@
+.star {
+    font-size: 1.8em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+  
+.filled {
+    color: gold;
+}
+
+.notationTitle {
+    margin: 0.5em 0;
+}
+  
