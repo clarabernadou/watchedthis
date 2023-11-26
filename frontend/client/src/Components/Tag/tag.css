@@ -1,0 +1,17 @@
+.genreTag {
+    display: flex;
+    gap: 0 1em;
+    align-items: center;
+    justify-content: space-between;
+    width: fit-content;
+    padding: 0.7em 0.9em;
+    border-radius: 0.5em;
+    font-size: 0.8em;
+    background-color: gray;
+    color: white;
+    margin: 0 0 1em 0;
+}
+
+.genreTag p {
+    margin: 0;
+}

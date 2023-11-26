@@ -1,0 +1,12 @@
+.signinPageContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3%;
+    gap: 2em;
+}
+
+.signupLogo {
+    height: 10%;
+}

@@ -1,0 +1,20 @@
+body {
+    width: -webkit-fill-available;
+    margin: 0;
+    padding: 0;
+    background-color: #181818;
+    color: white;
+    font-family: 'Ruda', Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+}
+
+.strong {
+    font-weight: 700;
+}
+
+@media screen and (max-width: 767px) {
+    body {
+      font-size: 14px;
+    }
+}
+  

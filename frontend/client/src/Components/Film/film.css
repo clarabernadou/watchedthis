@@ -1,0 +1,73 @@
+.filmContainer {
+    display: flex;
+    background-color: #0B0B0B;
+    border-radius: 1.5em;
+    padding: 3em;
+    margin: 3%;
+    gap: 2em;
+    height: auto;
+}
+
+.filmDropdownContainer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5em;
+}
+
+.filmInfosContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.watchlistBtnContainer {
+    display: flex;
+    gap: 1em;
+    margin: 1.1em 0;
+}
+
+.sizeFilmImg {
+    height: 25em !important;
+    width: 17em !important;
+}
+
+.filmTitle {
+    margin: 0;
+}
+
+.tagList {
+    display: flex;
+    gap: 0.5em;
+}
+
+.button {
+    border: none;
+    border-radius: 5em;
+    color: white;
+    text-transform: uppercase;
+    padding: 1.3em 1.5em;
+    font-weight: 700;
+}
+
+button .activeBtn {
+    background-color: #565656;
+}
+
+.star {
+    color: darkgrey;
+    font-size: 1.5em;
+}
+
+@media screen and (max-width: 767px) {
+    .filmContainer {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .filmInfosContainer {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+}

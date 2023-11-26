@@ -1,0 +1,39 @@
+.filmList {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 2em;
+    padding: 1.5% 3%;
+    font-size: initial;
+}
+
+.filmPoster {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 14em;
+    text-align: center;
+}
+
+.filmImg {
+    object-fit: cover;
+    height: 20em;
+    width: 14em;
+    border-radius: 0.5em;
+    transition: height 0.3s, width 0.3s;
+}
+
+.filmImg:hover {
+    height: 22em;
+    width: 16em;
+}
+
+.noFilmFound {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40vh;
+    width: 100%;
+    font-size: x-large;
+}

@@ -1,0 +1,37 @@
+.addTagBtn.open {
+    width: 25em;
+}
+  
+.insideTagBtn {
+    width: 19.5em;
+}
+
+.tagLine {
+    margin: 0em 0 0.5em 0;
+}
+
+.allTagOptions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1em 1em;
+}
+
+.tagOption {
+    margin: 0.5em 0;
+}
+
+@media screen and (max-width: 767px) {
+    .addTagBtn.open {
+        width: 12em;
+    }
+      
+    .insideTagBtn {
+        width: 9em;
+    }  
+    
+    .allTagOptions {
+        justify-content: space-between;
+    }
+}

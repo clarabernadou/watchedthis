@@ -1,0 +1,10 @@
+.profilePicture {
+    height: 10em;
+    width: 10em;
+    object-fit: cover;
+    border-radius: 100%;
+}
+
+.changeFileBtn {
+    margin: 0;
+}

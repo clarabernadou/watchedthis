@@ -1,0 +1,21 @@
+.sortBtn.open {
+    width: 20em;
+}
+
+.insideSortBtn {
+    width: 15em;
+}
+
+.sortBtnOption {
+    width: 100%;
+}
+
+@media screen and (max-width: 767px) {
+    .sortBtn.open {
+        width: 16em;
+    }
+      
+    .insideSortBtn {
+        width: 13em;
+    } 
+}

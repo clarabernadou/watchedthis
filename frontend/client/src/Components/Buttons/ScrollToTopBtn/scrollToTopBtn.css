@@ -1,0 +1,9 @@
+.scrollToTopBtn {
+    position: fixed;
+    bottom: 1.5em;
+    right: 1.5em;
+}
+
+.scrollToTopIcon {
+    font-size: 2em;
+}
