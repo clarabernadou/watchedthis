@@ -6,3 +6,8 @@
 
 # security
 /.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
