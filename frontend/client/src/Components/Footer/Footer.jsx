@@ -15,7 +15,7 @@ export default function Footer() {
                 </span>
                 <span className='contactText'>
                     <FontAwesomeIcon icon={faEnvelope} className='faIcon' />
-                    <a href="mailto:bernadouclara@icloud.com" className="link">bernadouclara@icloud.com</a>
+                    <a href="mailto:contact@clarabernadou.fr" className="link">contact@clarabernadou.fr</a>
                 </span>
                 <span className='contactText'>
                     <FontAwesomeIcon icon={faGithub} className='faIcon' />
