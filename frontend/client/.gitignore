@@ -27,3 +27,5 @@ public/images
 
 # security
 /.env
+.env.*
+!.env.example
