@@ -36,6 +36,7 @@ jobs:
           cp ../../demo/demo-api.js ../../demo/films.json build/
           sed -i 's|</head>|<script src="/watchedthis/demo-api.js"></script></head>|' build/index.html
           cp build/index.html build/404.html
+          cp -r ../../api-docs build/api-docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/client/build

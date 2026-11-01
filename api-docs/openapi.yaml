@@ -1,0 +1,491 @@
+openapi: 3.0.3
+info:
+  title: WatchedThis — API back-end (version 2023)
+  version: 1.0.0
+  description: |
+    API REST de WatchedThis : comptes vérifiés par e-mail, catalogue de films alimenté depuis TMDB, liste « à voir » et liste « déjà vus » avec note, commentaire et lieu.
+
+    Cette documentation est rédigée à partir du code du dépôt (routes, middlewares et contrôleurs). Elle décrit l'API ; aucun serveur n'est hébergé ici. La démonstration en ligne simule ces routes dans le navigateur avec des données fictives.
+
+    **Authentification** : les routes protégées exigent un jeton JWT dans l'en-tête `Authorization: Bearer <jeton>` (champ `authentication_token` de la réponse de connexion).
+servers:
+  - url: http://localhost:8080
+    description: Serveur local (port défini par la variable d'environnement PORT)
+tags:
+  - name: Authentification
+    description: Comptes et profil
+  - name: Films
+    description: Catalogue
+  - name: Listes de l'utilisateur
+    description: Liste à voir, films déjà vus, notes et commentaires
+paths:
+  /api/auth/signup:
+    post:
+      tags: [Authentification]
+      summary: Créer un compte
+      description: "Le compte est créé non vérifié et un e-mail contenant un lien de validation est envoyé. Un nom d'utilisateur ou une adresse déjà utilisés sont refusés avant l'enregistrement."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Compte créé
+          content:
+            application/json:
+              example:
+                message: User was registered successfully!
+        '400':
+          description: Nom d'utilisateur ou adresse e-mail déjà utilisé
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/signin:
+    post:
+      tags: [Authentification]
+      summary: Se connecter
+      description: "La connexion se fait avec le nom d'utilisateur. La réponse contient `is_verified` : l'application refuse l'accès tant que le compte n'est pas vérifié."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SigninResponse'
+        '401':
+          description: Mot de passe incorrect
+          content:
+            application/json:
+              example:
+                accessToken: null
+                message: Invalid Password!
+        '404':
+          description: Utilisateur inconnu
+          content:
+            application/json:
+              example:
+                message: User Not found.
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/logout:
+    post:
+      tags: [Authentification]
+      summary: Se déconnecter
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Déconnexion confirmée
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/verify/{token}:
+    get:
+      tags: [Authentification]
+      summary: Valider un compte
+      description: Route ouverte depuis le lien reçu par e-mail.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Jeton de validation envoyé par e-mail
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compte validé
+          content:
+            application/json:
+              example:
+                message: Account successfully validated
+        '404':
+          description: Jeton invalide ou expiré
+          content:
+            application/json:
+              example:
+                message: Invalid or expired validation token
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/{userId}:
+    get:
+      tags: [Authentification]
+      summary: Lire le profil d'un utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Profil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  profilePicture:
+                    type: string
+                    description: Nom du fichier de la photo de profil (servie depuis /images)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Utilisateur inconnu
+  /api/auth/update/{userId}:
+    put:
+      tags: [Authentification]
+      summary: Modifier le profil
+      description: "Nom d'utilisateur, e-mail et photo de profil (envoyée en multipart dans le champ `profilePicture`)."
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                profilePicture:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Profil modifié
+          content:
+            application/json:
+              example:
+                message: User profile updated successfully!
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Erreur, par exemple nom d'utilisateur ou e-mail déjà pris
+  /api/films:
+    get:
+      tags: [Films]
+      summary: Lister les films du catalogue
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tous les films enregistrés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Film'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/films/add:
+    post:
+      tags: [Films]
+      summary: Importer des films depuis TMDB
+      description: "Interroge l'API TMDB (découverte de films) et enregistre les films dans la base. Cette route n'est pas protégée dans le code actuel ; le même import est lancé chaque jour à minuit par une tâche planifiée."
+      responses:
+        '200':
+          description: Import terminé
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/films/{id}:
+    get:
+      tags: [Films]
+      summary: Lire un film
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FilmId'
+      responses:
+        '200':
+          description: Film trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Film'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Film introuvable
+          content:
+            application/json:
+              example:
+                error: Film not found
+  /api/films/update/{id}:
+    put:
+      tags: [Films]
+      summary: Modifier un film du catalogue
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FilmId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Film'
+      responses:
+        '200':
+          description: Film modifié
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Film introuvable
+  /api/films/auth/{userId}/film/{filmId}/status:
+    get:
+      tags: [Listes de l'utilisateur]
+      summary: Lire le statut d'un film pour un utilisateur
+      description: "Renvoie la ligne utilisateur/film, ou des valeurs par défaut (`toWatch` et `alreadyWatched` à false, le reste à null) si l'utilisateur n'a encore rien enregistré pour ce film."
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/FilmIdPath'
+      responses:
+        '200':
+          description: Statut
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFilm'
+  /api/films/auth/{userId}/film/{filmId}/add-to-watchlist:
+    post:
+      tags: [Listes de l'utilisateur]
+      summary: Ajouter à la liste à voir, ou l'en retirer
+      description: "Bascule `toWatch` : un deuxième appel retire le film de la liste."
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/FilmIdPath'
+      responses:
+        '200':
+          description: Liste mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/films/auth/{userId}/film/{filmId}/add-to-already-watched:
+    post:
+      tags: [Listes de l'utilisateur]
+      summary: Marquer comme déjà vu, ou annuler
+      description: "Bascule `alreadyWatched` : un deuxième appel annule le marquage."
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/FilmIdPath'
+      responses:
+        '200':
+          description: Liste mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/films/auth/{userId}/film/{filmId}/update/userFilm:
+    put:
+      tags: [Listes de l'utilisateur]
+      summary: Noter et commenter un film
+      description: "Met à jour la note, le commentaire et le lieu du visionnage. Le film doit déjà être associé à l'utilisateur (liste à voir ou déjà vus)."
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/FilmIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notation:
+                  type: integer
+                  nullable: true
+                  description: Note (étoiles)
+                comment:
+                  type: string
+                place:
+                  type: string
+                withList:
+                  type: string
+                  description: Avec qui le film a été vu
+      responses:
+        '200':
+          description: Données enregistrées
+          content:
+            application/json:
+              example:
+                message: Film data updated successfully
+        '404':
+          description: Aucune association entre l'utilisateur et ce film
+          content:
+            application/json:
+              example:
+                error: UserFilm association not found
+  /api/films/auth/{userId}/save-films/:
+    get:
+      tags: [Listes de l'utilisateur]
+      summary: Lister les associations utilisateur/film
+      description: "Renvoie toutes les lignes utilisateur/film de la base ; l'application filtre ensuite sur l'identifiant de l'utilisateur connecté."
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Associations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserFilm'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: integer
+    FilmId:
+      name: id
+      in: path
+      required: true
+      description: Identifiant du film (identifiant TMDB)
+      schema:
+        type: integer
+    FilmIdPath:
+      name: filmId
+      in: path
+      required: true
+      description: Identifiant du film (identifiant TMDB)
+      schema:
+        type: integer
+  responses:
+    Unauthorized:
+      description: Jeton absent, invalide ou expiré
+    ServerError:
+      description: Erreur serveur
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+  schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+    SigninResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        profilePicture:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        authentication_token:
+          type: string
+          description: Jeton JWT à renvoyer dans l'en-tête Authorization
+        is_verified:
+          type: boolean
+    Film:
+      type: object
+      description: Film au format TMDB, enregistré dans la base
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        original_title:
+          type: string
+        original_language:
+          type: string
+        overview:
+          type: string
+        release_date:
+          type: string
+          format: date
+        poster_path:
+          type: string
+        backdrop_path:
+          type: string
+        genre_ids:
+          type: string
+          description: Identifiants de genres TMDB, sous forme de texte JSON (par exemple « [28,12] »)
+        popularity:
+          type: number
+        vote_average:
+          type: number
+        vote_count:
+          type: integer
+        adult:
+          type: boolean
+        video:
+          type: boolean
+    UserFilm:
+      type: object
+      properties:
+        filmId:
+          type: integer
+          nullable: true
+        userId:
+          type: integer
+        toWatch:
+          type: boolean
+        alreadyWatched:
+          type: boolean
+        notation:
+          type: integer
+          nullable: true
+        comment:
+          type: string
+          nullable: true
+        place:
+          type: string
+          nullable: true
+        with:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
